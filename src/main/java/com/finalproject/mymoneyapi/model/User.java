@@ -34,7 +34,7 @@ public class User {
     private String phone;
 
     @OneToMany(mappedBy = "user")
-    private List<Expenses> expenses;
+    private List<Entry> entries;
 
     public Long getId() {
         return id;
@@ -92,11 +92,11 @@ public class User {
         this.phone = phone;
     }
 
-    public List<Expenses> getExpenses() {
-        return expenses;
+    public List<Entry> getEntries() {
+        return entries;
     }
 
-    public void setExpenses(List<Expenses> expenses) {
-        this.expenses = expenses;
+    public void setEntries(List<Entry> entries) {
+        this.entries = entries;
     }
 }
