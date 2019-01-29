@@ -1,7 +1,7 @@
 package com.finalproject.mymoneyapi.security;
 
 import com.auth0.jwt.JWT;
-import com.finalproject.mymoneyapi.model.User;
+import com.finalproject.mymoneyapi.entities.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.finalproject.mymoneyapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
