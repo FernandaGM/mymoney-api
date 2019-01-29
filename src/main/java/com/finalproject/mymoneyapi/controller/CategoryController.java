@@ -1,6 +1,6 @@
 package com.finalproject.mymoneyapi.controller;
 
-import com.finalproject.mymoneyapi.model.Category;
+import com.finalproject.mymoneyapi.entities.Category;
 import com.finalproject.mymoneyapi.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.finalproject.mymoneyapi.model.User user = userRepository.findByUsername(username);
+        com.finalproject.mymoneyapi.entities.User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
