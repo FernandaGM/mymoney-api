@@ -1,6 +1,4 @@
-package com.finalproject.mymoneyapi.model;
-
-import org.hibernate.annotations.SortNatural;
+package com.finalproject.mymoneyapi.entities;
 
 import javax.persistence.*;
 import java.util.Date;

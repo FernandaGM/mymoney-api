@@ -1,4 +1,6 @@
-package com.finalproject.mymoneyapi.model;
+package com.finalproject.mymoneyapi.entities;
+
+import com.finalproject.mymoneyapi.entities.Entry;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;

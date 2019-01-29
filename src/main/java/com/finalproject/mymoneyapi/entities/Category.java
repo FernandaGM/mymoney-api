@@ -1,4 +1,4 @@
-package com.finalproject.mymoneyapi.model;
+package com.finalproject.mymoneyapi.entities;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
