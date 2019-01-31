@@ -12,6 +12,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -63,10 +64,9 @@ public class UserController {
     }
 
     @PutMapping("/update/{username}")
-    public Response update(@PathVariable(name = "username") String username, @RequestBody User updatedUser) {
-        Response resp = new Response();
+    public boolean update(@PathVariable(name = "username") String username, @RequestBody User updatedUser) {
 
-        User user = userRepository.findByUsername(username);;
+        User user = userRepository.findByUsername(username);
 
         if (user != null) {
 
@@ -78,20 +78,15 @@ public class UserController {
             try {
                 userRepository.save(user);
 
-                resp.setMessage("Usuário atualizado com sucesso");
-                resp.setStatus(200);
+                return true;
 
             } catch (DataAccessException err) {
-                resp.setStatus(400);
-                resp.setMessage(err.getRootCause().getMessage());
+                return false;
             }
 
         } else {
-            resp.setStatus(404);
-            resp.setMessage("Não foi possivel atualizar o cadastro, usuário não encontrado");
+            return false;
         }
-
-        return resp;
 
     }
 
@@ -113,26 +108,27 @@ public class UserController {
 
         System.out.println("Dashboard");
 
-        if(entryRepository.countByUser_UsernameAndCreatedAtBetween(username, dates.getFirst(), dates.getSecond()) > 0) {
+        if(entryRepository.countByUser_UsernameAndDataBetween(username, dates.getFirst(), dates.getSecond()) > 0) {
             // Get data
-            List<Entry> entries = entryRepository.findByUser_UsernameAndCreatedAtBetweenOrderByCreatedAtDesc(
+            List<Entry> entries = entryRepository.findByUser_UsernameAndDataBetweenOrderByDataDesc(
                     username, dates.getFirst(), dates.getSecond());
 
-            double totalReceitas = 0.0;
-            double totalDespesas = 0.0;
+            BigDecimal totalReceitas = new BigDecimal(0.0);
+            BigDecimal totalDespesas = new BigDecimal(0.0);
 
-            Entry[] lastEntries = new Entry[4];
+            SimpleEntry[] lastEntries = new SimpleEntry[4];
 
             int x = 0;
 
             for (Entry entry: entries) {
-                if(entry.getIsIncome().equals('S')) {
-                    totalReceitas += entry.getValue();
+                System.out.println(entry.getIsIncome());
+                if(entry.getIsIncome().equals("S")) {
+                    totalReceitas = totalReceitas.add(entry.getValue());
                 } else {
-                    totalDespesas += entry.getValue();
+                    totalDespesas = totalDespesas.add(entry.getValue());
                 }
                 if(x < 4) {
-                    lastEntries[x] = entry;
+                    lastEntries[x] = new SimpleEntry(entry);
                     x++;
                 }
             }
@@ -141,24 +137,19 @@ public class UserController {
 
             ArrayList array = new ArrayList();
 
-            DataSet[] dados = new DataSet[2];
+            double[] valoresReceita = {totalReceitas.doubleValue()};
 
-            double[] valores = new double[1];
+            double[] valoresDespesa = {totalDespesas.doubleValue()};
 
-            valores[0] = totalReceitas;
-
-            double[] valores2 = new double[1];
-
-            valores2[0] = totalDespesas;
-
-            dados[0] = new DataSet("Incomes", "#13f558", "#00e50a", valores);
-            dados[1] = new DataSet("Expenses", "#f53f27", "#e5001d", valores2);
+            DataSet[] dados = {new DataSet("Incomes", "#13f558", "#00e50a", valoresReceita),
+                    new DataSet("Expenses", "#f53f27", "#e5001d", valoresDespesa)
+            };
 
             array.add(new DashboardData(new String[0], dados));
 
             array.add(lastEntries);
 
-            array.add(totalReceitas > totalDespesas ? totalReceitas : totalDespesas);
+            array.add(totalReceitas.compareTo(totalDespesas) == 1 ? totalReceitas.doubleValue() : totalDespesas.doubleValue());
 
             return array;
         }
@@ -215,6 +206,7 @@ public class UserController {
             sUser.setFirstName(user.getFirstName());
             sUser.setLastName(user.getLastName());
             sUser.setEmail(user.getEmail());
+            sUser.setPhone(user.getPhone());
 
             return sUser;
         }

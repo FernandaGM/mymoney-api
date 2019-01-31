@@ -3,6 +3,7 @@ package com.finalproject.mymoneyapi.controller;
 import com.finalproject.mymoneyapi.entities.Entry;
 import com.finalproject.mymoneyapi.model.Response;
 import com.finalproject.mymoneyapi.entities.User;
+import com.finalproject.mymoneyapi.model.SimpleEntry;
 import com.finalproject.mymoneyapi.repository.EntryRepository;
 import com.finalproject.mymoneyapi.repository.UserRepository;
 import com.finalproject.mymoneyapi.util.DataUtils;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -44,7 +46,7 @@ public class EntriesController {
     }
 
     @GetMapping("/expense/getbyusername/{username}/{month}/{year}/{page}")
-    public List<Entry> getMonthExpenses(
+    public List<SimpleEntry> getMonthExpenses(
             @PathVariable(name = "username") String username,
             @PathVariable(name = "month") int month,
             @PathVariable(name = "year") int year,
@@ -53,14 +55,14 @@ public class EntriesController {
         Pair<Date, Date> dates = DataUtils.getDateRangeFromYearMonth(month, year);
 
         List<Entry> entries = entryRepository
-                .findByUser_UsernameAndIsIncomeAndCreatedAtBetweenOrderByCreatedAtDesc(
+                .findByUser_UsernameAndIsIncomeAndDataBetweenOrderByDataDesc(
                         username,
                         "N",
                         dates.getFirst(),
                         dates.getSecond(),
                         PageRequest.of(page, 10));
 
-        return entries;
+        return transformEntries(entries);
     }
 
     @GetMapping("/expense/gettotalbyusername/{username}/{month}/{year}")
@@ -72,7 +74,7 @@ public class EntriesController {
 
         System.out.println("Dados de total");
 
-        return entryRepository.countByUser_UsernameAndIsIncomeAndCreatedAtBetween(
+        return entryRepository.countByUser_UsernameAndIsIncomeAndDataBetween(
                 username,
                 "N",
                 dates.getFirst(),
@@ -80,9 +82,45 @@ public class EntriesController {
         );
     }
 
+    @GetMapping("/income/getbyusername/{username}/{month}/{year}/{page}")
+    public List<SimpleEntry> getMonthIncomes(
+            @PathVariable(name = "username") String username,
+            @PathVariable(name = "month") int month,
+            @PathVariable(name = "year") int year,
+            @PathVariable(name = "page") int page) {
+
+        Pair<Date, Date> dates = DataUtils.getDateRangeFromYearMonth(month, year);
+
+        List<Entry> entries = entryRepository
+                .findByUser_UsernameAndIsIncomeAndDataBetweenOrderByDataDesc(
+                        username,
+                        "S",
+                        dates.getFirst(),
+                        dates.getSecond(),
+                        PageRequest.of(page, 10));
+
+        return transformEntries(entries);
+    }
+
+    @GetMapping("/income/gettotalbyusername/{username}/{month}/{year}")
+    public int getTotalMonthIncomes(
+            @PathVariable(name = "username") String username,
+            @PathVariable(name = "month") int month,
+            @PathVariable(name = "year") int year) {
+        Pair<Date, Date> dates = DataUtils.getDateRangeFromYearMonth(month, year);
+
+        System.out.println("Dados de total");
+
+        return entryRepository.countByUser_UsernameAndIsIncomeAndDataBetween(
+                username,
+                "S",
+                dates.getFirst(),
+                dates.getSecond()
+        );
+    }
+
     @PostMapping("/add/{username}")
-    public Response addExpense(@PathVariable(name = "username") String username, @RequestBody Entry entry) {
-        Response resp = new Response();
+    public boolean addEntry(@PathVariable(name = "username") String username, @RequestBody Entry entry) {
 
         User user = userRepository.findByUsername(username);
 
@@ -91,40 +129,69 @@ public class EntriesController {
         try {
             entryRepository.save(entry);
 
-            resp.setStatus(200);
-            resp.setMessage("Despesa salva com sucesso");
+            return true;
         } catch (DataAccessException err) {
-            resp.setStatus(400);
-            resp.setMessage(err.getRootCause().getMessage());
+            System.out.println(err.getRootCause().getMessage());
         }
 
-        return resp;
+        return false;
     }
 
     @PutMapping("/update/{id}")
-    public Response updateExpense(@PathVariable(name = "id") Long id, @RequestBody Entry updatedEntry) {
-
-        Response resp = new Response();
+    public boolean updateEntry(@PathVariable(name = "id") Long id, @RequestBody Entry updatedEntry) {
 
         Entry entry = entryRepository.findById(id).get();
 
         if(entry != null) {
             try {
                 // Update entry
+                entry.setCategories(updatedEntry.getCategories());
+                entry.setData(updatedEntry.getData());
+                entry.setDescription(updatedEntry.getDescription());
+                entry.setIsIncome(updatedEntry.getIsIncome());
+                entry.setValue(updatedEntry.getValue());
 
                 entryRepository.save(entry);
 
-                resp.setStatus(200);
-                resp.setMessage("Despesa atualizada com sucesso");
+                return true;
             } catch (DataAccessException err) {
-                resp.setStatus(400);
-                resp.setMessage(err.getRootCause().getMessage());
+                System.out.println(err.getRootCause().getMessage());
             }
-        } else {
-            resp.setMessage("Não foi possivel atualizar, despesa não encontrada");
-            resp.setStatus(404);
         }
 
-        return resp;
+        return false;
+    }
+
+    @GetMapping("/get/{id}")
+    public SimpleEntry getEntry(@PathVariable("id") Long id) {
+
+        Entry entry = entryRepository.findById(id).get();
+
+        if (entry != null) {
+            return new SimpleEntry(entry);
+        }
+
+        return null;
+    }
+
+    @DeleteMapping("/remove/{id}")
+    public boolean removeEntry(@PathVariable("id") Long id) {
+        try {
+            entryRepository.deleteById(id);
+            return true;
+        } catch (DataAccessException err) {
+            System.out.println(err.getRootCause().getMessage());
+        }
+        return false;
+    }
+
+    public List<SimpleEntry> transformEntries(List<Entry> entries) {
+        ArrayList<SimpleEntry> simpleEntries = new ArrayList<SimpleEntry>();
+
+        for (Entry entry: entries) {
+            simpleEntries.add(new SimpleEntry(entry));
+        }
+
+        return simpleEntries;
     }
 }
