@@ -14,9 +14,6 @@ public class Category {
     @Size(max = 20)
     private String name;
 
-    @Size(max = 40)
-    private String description;
-
     @Size(min = 1, max = 1)
     private String isIncome;
 
@@ -34,14 +31,6 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getIsIncome() {

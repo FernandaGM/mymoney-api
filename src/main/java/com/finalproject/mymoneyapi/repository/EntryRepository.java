@@ -18,16 +18,16 @@ public interface EntryRepository extends JpaRepository<Entry, Long> {
 
     List<Entry> findByUser_Username(String username);
 
-    List<Entry> findByUser_UsernameAndIsIncomeAndCreatedAtBetweenOrderByCreatedAtDesc(String username, String isIncome, Date inicio, Date fim, Pageable pageable);
+    List<Entry> findByUser_UsernameAndIsIncomeAndDataBetweenOrderByDataDesc(String username, String isIncome, Date inicio, Date fim, Pageable pageable);
 
-    List<Entry> findByUser_UsernameAndCreatedAtBetweenOrderByCreatedAtDesc(String username, Date inicio, Date fim);
+    List<Entry> findByUser_UsernameAndDataBetweenOrderByDataDesc(String username, Date inicio, Date fim);
 
-    Long countByUser_UsernameAndCreatedAtBetween(String username, Date inicio, Date fim);
+    Long countByUser_UsernameAndDataBetween(String username, Date inicio, Date fim);
 
     int countByUser_UsernameAndIsIncome(String username, String isIncome);
 
     @Query("select coalesce(sum(e.value), 0) from User u join u.entries e where u.username = ?1 and e.isIncome = ?2")
     double totalByUser_UsernameAndIsIncome(String username, String isIncome);
 
-    int countByUser_UsernameAndIsIncomeAndCreatedAtBetween(String username, String isIncome, Date inicio, Date fim);
+    int countByUser_UsernameAndIsIncomeAndDataBetween(String username, String isIncome, Date inicio, Date fim);
 }

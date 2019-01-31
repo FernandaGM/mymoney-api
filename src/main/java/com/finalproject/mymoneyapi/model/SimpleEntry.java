@@ -1,35 +1,34 @@
-package com.finalproject.mymoneyapi.entities;
+package com.finalproject.mymoneyapi.model;
 
-import javax.persistence.*;
+import com.finalproject.mymoneyapi.entities.Category;
+import com.finalproject.mymoneyapi.entities.Entry;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-@Entity
-@Table(name = "entries")
-public class Entry {
+public class SimpleEntry {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String description;
 
     private BigDecimal value;
 
-    @OrderBy
     private Date data;
-
-    @OrderBy
-    private Date createdAt;
 
     private String isIncome;
 
-    @ManyToMany
     private List<Category> categories;
 
-    @ManyToOne
-    private User user;
+    public SimpleEntry(Entry entry) {
+        this.id = entry.getId();
+        this.description = entry.getDescription();
+        this.value = entry.getValue();
+        this.data = entry.getData();
+        this.isIncome = entry.getIsIncome();
+        this.categories = entry.getCategories();
+    }
 
     public Long getId() {
         return id;
@@ -63,14 +62,6 @@ public class Entry {
         this.data = data;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public String getIsIncome() {
         return isIncome;
     }
@@ -84,14 +75,6 @@ public class Entry {
     }
 
     public void setCategories(List<Category> categories) {
-        this.categories = categories;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
+            this.categories = categories;
+        }
 }
