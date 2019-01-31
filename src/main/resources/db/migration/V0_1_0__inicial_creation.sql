@@ -10,6 +10,5 @@ CREATE TABLE if not exists  users (
 
 CREATE table if not exists categories (
   id int not null AUTO_INCREMENT PRIMARY key,
-  `name` varchar(20),
-  description varchar(40)
+  `name` varchar(20)
 );
